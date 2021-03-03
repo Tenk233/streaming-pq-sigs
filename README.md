@@ -3,7 +3,7 @@
 This repository contains the code accompanying the paper "Verifying Post-Quantum Signatures in 18 kB of RAM".
 
 All benchmarking results claimed in the paper can be reproduced with this code.
-It builds on top of [PQM3](https://github.com/mupq/pqm3) and [PQClean](https://github.com/pqclean/pqclean) library.
+It builds on top of [PQM3](https://github.com/mupq/pqm3) and [PQClean](https://github.com/pqclean/pqclean) libraries.
 
 To get started, clone the repository:
 
@@ -12,29 +12,10 @@ git clone --recursive https://git.fslab.de/pqc/streaming-pq-sigs
 ```
 
 **Only the STM NUCLEO-F207ZG** (nucleo-f207zg target of pqm3) is supported.
-The communication between host and M3 board works via serial communication. 
 For a general setup of the board, see the [PQM3](https://github.com/mupq/pqm3) documentation.
 
-## Communication
-A very simple protocol on top of UART is used to stream the signature and public key.
-Communication works as follows:
-```
-[HOST]                 [M3 DEVICE]
-        <---[Init]---
-       ---[sm length]--->
-      <---[req X bytes]---
-       ---[send X bytes]-->
-       <---[req X bytes]---
-       ---[send X bytes]-->
-       [...]
-```
 
-The length of `sm` (signed message) is transferred to the device, since it is not known during compile time. The possibility for the device to request chunks individually makes precise timing measurements possible. 
-The sending and receiving of UART data is implemented with polling. This makes it possible to disable interrupts for precise timing measurement.
-
-The device can send strings (e.g. for debugging purposes) to the host at any time.
-
-## Add a Scheme
+## Adding a Scheme
 
 To add a scheme, the following functions have to be added to its API:
 
@@ -103,11 +84,11 @@ cd pqclean
 patch < ../patches/pqclean.patch -p1
 ```
 
-This patch makes sure that actually random test cases are generated.
-If it is not apploed, PQClean will always generate the same test case.
+This patch makes sure that random test cases are generated.
+If it is not applied, PQClean will exclusively generate a single test case over and over.
 
 ### Generating Test Cases
-To generate test data, the script [generate_testcases.sh](./scripts/generate_testcases.sh) can be used.
+To generate test cases, the script [generate_testcases.sh](./scripts/generate_testcases.sh) can be used.
 It uses the PQClean testvectors program.
 
 It can be invoked like this:
@@ -171,13 +152,13 @@ To run the tests on all available targets in the `elf` directory, call the `test
 ```
 
 ## Benchmarks
-A benchmark sends benchmark results via a benchmark message (e.g. `STREAM_SPEED_BENCHMARK`).
+A benchmark sends benchmark results via a benchmark messages (e.g. `STREAM_SPEED_BENCHMARK`).
 
 There are three benchmark implementations included:
 
-* [cycles.c](crypto_sign_stream/cycles.c), measuring cpu cycle counts
-* [stack.c](crypto_sign_stream/stack.c), measuring stack usage
-* [hashing.c](crypto_sign_stream/hashing.c), measuring how many cpu cycles are used within symmetric primitives
+* [cycles.c](crypto_sign_stream/cycles.c), measures cpu cycle counts
+* [stack.c](crypto_sign_stream/stack.c), measures stack usage
+* [hashing.c](crypto_sign_stream/hashing.c), measures how many cpu cycles are spend within symmetric primitives
 
 ### Runing Benchmarks on an Implementation
 To run the `cycles.c` benchmark with the `falcon-512` scheme do the following steps:
@@ -210,7 +191,7 @@ The script will generate `csv` files in the `benchmarks` directory.
 One `csv` file per target is generated.
 Every test case (see section *Test Data*) is run once and benchmarked.
 
-To run **all** benchmarks on **all** targets, call the [run_all_experiments.sh](run_all_experiments.sh) script:
+To run **all** benchmarks on **all** targets, call the [run_all_experiments.sh](scripts/run_all_experiments.sh) script:
 
 ```bash
 ./scripts/run_all_experiments.sh
@@ -229,6 +210,7 @@ Important parameters:
 
 * `-s` for selecting a specific scheme or multiple schemes
 * `-f` specifying the output format (plain, html or latex)
+* `-p` to output the final tables used in the paper
 
 Example calls:
 
@@ -239,4 +221,21 @@ Example calls:
 ./scripts/print_benchmarks.py -f latex
 ```
 
+## Communication
+A very simple protocol on top of UART is used to stream the signature and public key.
+Communication works as follows:
+```
+[HOST]                 [M3 DEVICE]
+        <---[Init]---
+       ---[sm length]--->
+      <---[req X bytes]---
+       ---[send X bytes]-->
+       <---[req X bytes]---
+       ---[send X bytes]-->
+       [...]
+```
 
+The length of `sm` (signed message) is transferred to the device, since it is not known during compile time. The possibility for the device to request chunks individually makes precise timing measurements possible. 
+The sending and receiving of UART data is implemented with polling. This makes it possible to disable interrupts for precise timing measurement.
+
+The device can send strings (e.g. for debugging purposes) to the host at any time.
