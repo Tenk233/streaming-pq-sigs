@@ -14,6 +14,14 @@ git clone --recursive https://git.fslab.de/pqc/streaming-pq-sigs
 **Only the STM NUCLEO-F207ZG** (nucleo-f207zg target of pqm3) is supported.
 For a general setup of the board, see the [PQM3](https://github.com/mupq/pqm3) documentation.
 
+## Prerequisites
+In order to use the code in this repository, a list of software components needs to be installed:
+
+* [An up to date ARM toolchain](https://developer.arm.com/tools-and-software/open-source-software/developer-tools/gnu-toolchain/gnu-rm/downloads)
+* Python 3 with `pyserial` and `tabluate` packages installed. This can be done with `pip install -r streaming/requirements.txt`.
+* [OpenOCD](http://openocd.org/), which is available as a package in all major Linux distributions
+* Make, which is also available as a package in all major Linux distributions
+
 
 ## Adding a Scheme
 
@@ -98,7 +106,7 @@ target and place them into
 , one can use this command:
 
 ```bash
-./scripts/generate_testcases.sh  falcon-512 10 elf/crypto_sign_stream_falcon-512_opt-ct_test.elf
+./scripts/generate_testcases.sh  falcon-512 10 elf/crypto_sign_stream_falcon-512_opt-ct_cycles.elf
 ```
 
 
