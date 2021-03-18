@@ -74,19 +74,6 @@ sm: $SM_IN HEX
 pk: $PK_IN_HEX
 ```
 
-### Patching PQClean
-To allow for non-deterministic test case generation, our patch has to be applied:
-
-```bash
-# Change into pqclean submodule
-cd pqclean
-# Apply patch
-patch < ../patches/pqclean.patch -p1
-```
-
-This patch makes sure that random test cases are generated.
-If it is not applied, PQClean will exclusively generate a single test case over and over.
-
 ### Generating Test Cases
 To generate test cases, the script [generate_testcases.sh](./scripts/generate_testcases.sh) can be used.
 It uses the PQClean testvectors program.
