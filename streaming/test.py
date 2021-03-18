@@ -20,7 +20,7 @@ TESTS = [
 PK_HASH_FUNCTION = {
     "crypto_sign_stream_gemss-128_m3" :                   lambda msg: hashlib.shake_128(msg).digest(32),
     "crypto_sign_stream_dilithium2_m3" :                  lambda msg: hashlib.shake_256(msg).digest(32),
-    "crypto_sign_stream_falcon-512_opt-ct":               lambda msg: hashlib.shake_128(msg).digest(32),
+    "crypto_sign_stream_falcon-512_opt-ct":               lambda msg: hashlib.shake_256(msg).digest(32),
     "crypto_sign_stream_rainbowI-classic_m3":             lambda msg: hashlib.sha256(msg).digest(),
     "crypto_sign_stream_sphincs-sha256-128f-simple_clean": lambda msg: msg,
     "crypto_sign_stream_sphincs-sha256-128s-simple_clean": lambda msg: msg,
