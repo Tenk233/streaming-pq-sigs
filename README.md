@@ -27,7 +27,7 @@ In order to use the code in this repository, a list of software components needs
 
 To add a scheme, the following functions have to be added to its API:
 
-```C
+```c
 /* Initialize stream with given length of sm.
  * This function has to initialize the context ctx with chunk size etc.
  */
