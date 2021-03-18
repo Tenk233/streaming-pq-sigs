@@ -15,8 +15,8 @@
 #include <string.h>
 
 static u8 pk[CRYPTO_PUBLICKEYBYTES];
-/* This is where the ctual known PK would go */
-const u8 fixed_pk[CRYPTO_PUBLICKEYBYTES] = {0};
+/* This is where the actual known PK would go */
+u8 fixed_pk[CRYPTO_PUBLICKEYBYTES] = {0};
 
 stream_state cur_state = 0;
 unsigned char root[N];
@@ -27,14 +27,24 @@ uint32_t tree_addr[8] = {0};
 unsigned char wots_pk[WOTS_BYTES];
 uint32_t wots_pk_addr[8] = {0};
 unsigned char leaf[N];
+u32 wots_tree_counter = 0;
 // TODO: check, can this be omitted?
 hash_state hash_state_seeded;
 
-int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen) {
+int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen, u8 *pk_hash_init) {
+    size_t i;
     /* Stream sm one byte at a time */
     ctx->sm_len = smlen;
     ctx->sm_chunk_size = FORS_BYTES + N; /* All FORS tree stuff + R */
     ctx->pk_chunk_size = CRYPTO_PUBLICKEYBYTES;
+    cur_state = STREAM_STATE_BEGIN;
+
+    // Warning: In the real world the pk_hash would be embedded into the firmware.
+    // As we don't want to do that in our experiments, we just copy it here
+    for(i=0;i<CRYPTO_PUBLICKEYBYTES;i++){
+        fixed_pk[i] = pk_hash_init[i];
+    }
+
     /* Initialize state */
     return 0;
 }
@@ -89,7 +99,6 @@ int crypto_sign_open_consume_sm_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t 
         hash_message(
             mhash, &tree, &idx_leaf, sm_ptr, pk, NULL, 0, &hash_state_seeded);
         sm_ptr += N;
-
         /* Layer correctly defaults to 0, so no need to set_layer_addr */
         set_tree_addr(wots_addr, tree);
         set_keypair_addr(
@@ -101,12 +110,13 @@ int crypto_sign_open_consume_sm_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t 
         // FORS_BYTES = 4800
         // sm_ptr += FORS_BYTES;
         cur_state = STREAM_STATE_RECOVERD_FORS_ROOT;
-        ctx->sm_chunk_size = WOTS_MULT_CHUNK_SIZE; 
+        ctx->sm_chunk_size = WOTS_MULT_CHUNK_SIZE;
     } else if (cur_state == STREAM_STATE_RECOVERD_FORS_ROOT) {
          /* For each subtree.. */
+         u32 limit = MIN((wots_tree_counter + WOTS_TREES_PER_CHUNK),D);
         
-        for (u32 i = 0; i < D; i++) {
-            set_layer_addr(tree_addr, i);
+        for (; wots_tree_counter < limit; wots_tree_counter++) {
+            set_layer_addr(tree_addr, wots_tree_counter);
             set_tree_addr(tree_addr, tree);
 
             copy_subtree_addr(
@@ -128,7 +138,7 @@ int crypto_sign_open_consume_sm_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t 
             /* Compute the leaf node using the WOTS public key. */
             thash_WOTS_LEN(
                 leaf, wots_pk, pub_seed, wots_pk_addr, &hash_state_seeded);
-
+            
             /* Compute the root node of this subtree. */
             compute_root(
                 root, leaf, idx_leaf, 0, sm_ptr, TREE_HEIGHT,
@@ -140,9 +150,15 @@ int crypto_sign_open_consume_sm_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t 
             idx_leaf = (tree & ((1 << TREE_HEIGHT) - 1));
             tree = tree >> TREE_HEIGHT;
         }
-        
-        ctx->sm_chunk_size = 0;
 
+        if (wots_tree_counter + WOTS_TREES_PER_CHUNK > D) {
+            ctx->sm_chunk_size = (D - wots_tree_counter) * WOTS_CHUNK_SIZE;
+        }
+        
+        if (wots_tree_counter == D) {
+            // We are done
+            ctx->sm_chunk_size = 0;
+        }
     }
 
     return 0;

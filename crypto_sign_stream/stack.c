@@ -15,8 +15,6 @@
 
 /* sm + pk */
 u8 m[MLEN];
-u8 m_out[MLEN + CRYPTO_BYTES];
-
 
 crypto_stream_ctx ctx;
 u64 t0, t1;
@@ -164,12 +162,17 @@ int main(void) {
 
   smlen = stream_recv_sm_length();
   stream_send_str("[DEVICE]Received length");
-  
+
+  // Warning: In the real world the pk_hash would be embedded into the firmware.
+  // As we don't want to do that in our experiments, we just copy it here
+  u8 pk_hash[32];
+  stream_recv_pk_hash(pk_hash);
+  stream_send_str("[DEVICE]Received pk hash");
+
   FILL_STACK();
-  tmp_res = crypto_sign_open_init_stream(&ctx, smlen);
+  tmp_res = crypto_sign_open_init_stream(&ctx, smlen, pk_hash);
   CHECK_STACK();
   stream_send_benchmark("crypto_sign_open_init_stream_stack", c);
-  
 
   while (tmp_res != 0) {
     stream_send_str("[DEVICE]Could not initialize streaming interface");

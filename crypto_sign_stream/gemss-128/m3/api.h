@@ -23,7 +23,7 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m, size
 
 
 #define OFFSET_LAST_EQUATIONS (NB_MONOMIAL_PK*HFEmq8)
-#define PK_CHUNK_SIZE (HFEmq8*500)
+#define PK_CHUNK_SIZE (HFEmq8*228)
 #define PK_LAST_CHUNK_SIZE (CRYPTO_PUBLICKEYBYTES-OFFSET_LAST_EQUATIONS)
 
 #define CRYPTO_STREAM_MAX_MSG_LEN 33
@@ -38,7 +38,7 @@ int crypto_sign_verify(const uint8_t *sig, size_t siglen, const uint8_t *m, size
 /* Initialize stream with given length of sm. 
  * This function has to initialize the context ctx with chunk size etc.
  */
-int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen);
+int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen, u8 *pk_hash_init);
 /* Consume chunk of public key. id is the number of the chunk. */
 int crypto_sign_open_consume_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);
 int crypto_sign_open_hash_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);

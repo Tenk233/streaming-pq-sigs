@@ -1,7 +1,6 @@
 #include "ntt.h"
 #include "params.h"
 #include "poly.h"
-#include "reduce.h"
 #include <stdint.h>
 
 

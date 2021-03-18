@@ -123,8 +123,14 @@ int main(void) {
 
   smlen = stream_recv_sm_length();
   stream_send_str("[DEVICE]Received length");
-  
-  while (crypto_sign_open_init_stream(&ctx, smlen) != 0) {
+
+  // Warning: In the real world the pk_hash would be embedded into the firmware.
+  // As we don't want to do that in our experiments, we just copy it here
+  u8 pk_hash[32];
+  stream_recv_pk_hash(pk_hash);
+  stream_send_str("[DEVICE]Received pk hash");
+
+  while (crypto_sign_open_init_stream(&ctx, smlen, pk_hash) != 0) {
     stream_send_str("[DEVICE]Could not initialize streaming interface");
   }
 

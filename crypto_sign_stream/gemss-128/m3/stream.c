@@ -11,7 +11,7 @@
 
 /* This is where the hash of the public key would be */
 #define VERIF_HASH_LEN 32
-const u8 pk_hash[VERIF_HASH_LEN] = {0};
+u8 pk_hash[VERIF_HASH_LEN];
 static shake128incctx shake_s;
 
 
@@ -34,13 +34,21 @@ int iq, ir, jq, jr;
 
 
 
-int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen) {
+int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen, u8 *pk_hash_init) {
+    size_t i;
     /* Stream sm one byte at a time */
     ctx->sm_len = smlen;
     ctx->sm_chunk_size = smlen;
 
     ctx->pk_chunk_size = PK_CHUNK_SIZE;
     state = STREAM_IT_0;
+
+    // Warning: In the real world the pk_hash would be embedded into the firmware.
+    // As we don't want to do that in our experiments, we just copy it here
+    for(i=0;i<VERIF_HASH_LEN;i++){
+        pk_hash[i] = pk_hash_init[i];
+    }
+
 
     iq = 0, ir = 0, jq = 0, jr = -1;
     return 0;

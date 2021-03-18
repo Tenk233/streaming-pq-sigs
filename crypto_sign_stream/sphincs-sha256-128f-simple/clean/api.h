@@ -8,7 +8,6 @@
 #include "params.h"
 
 
-
 #define CRYPTO_ALGNAME "SPHINCS+"
 
 #define CRYPTO_SECRETKEYBYTES 64
@@ -81,13 +80,17 @@ int crypto_sign_open(
     uint8_t *m, size_t *mlen,
     const uint8_t *sm, size_t smlen, const uint8_t *pk);
 
-#define WOTS_CHUNK_SIZE (TREE_HEIGHT * N + WOTS_BYTES)
-#define WOTS_MULT_CHUNK_SIZE (D * WOTS_CHUNK_SIZE)
-#define CRYPTO_STREAM_MAX_CHUNK_SIZE WOTS_MULT_CHUNK_SIZE
+/* TREE_HEIGHT * N + WOTS_BYTES = 608 */
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define WOTS_CHUNK_SIZE (WOTS_BYTES + TREE_HEIGHT * N)
+#define WOTS_TREES_PER_CHUNK 8
+#define FORS_AND_R_SIZE (FORS_BYTES + N)
+#define WOTS_MULT_CHUNK_SIZE (WOTS_TREES_PER_CHUNK * WOTS_CHUNK_SIZE) 
+#define CRYPTO_STREAM_MAX_CHUNK_SIZE MAX(FORS_AND_R_SIZE,WOTS_MULT_CHUNK_SIZE)
 #define CRYPTO_STREAM_MAX_MSG_LEN 33
 #define CRYPTO_STREAM_ORDER_PK_SM
 #define MAX_STACK_CANARY_SIZE 0x10000
-#define SM_BYTES_WITHOUT_FORS (CRYPTO_BYTES-FORS_BYTES-N)
 /* Init streaming interface.
    mode - Tell streaming interface a specific mode affecting e.g. num and size
    num - How many chunks are expected
@@ -96,7 +99,7 @@ int crypto_sign_open(
 /* Initialize stream with given length of sm.
  * This function has to initialize the context ctx with chunk size etc.
  */
-int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen);
+int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen, u8 *pk_hash_init);
 /* Consume chunk of public key. id is the number of the chunk. */
 int crypto_sign_open_consume_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);
 int crypto_sign_open_hash_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);

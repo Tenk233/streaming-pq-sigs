@@ -110,12 +110,12 @@ SCHEMES_SORTED = ['sphincs-sha256-128s-simple_clean',
                    'falcon-512_opt-ct']
 
 FIXED_BUFFER_SIZES = {
-    'sphincs-sha256-128s-simple_clean': 7856,
-    'sphincs-sha256-128f-simple_clean': 13376,
-    'rainbowI-classic_m3': 16384,
-    'gemss-128_m3': 10000,
+    'sphincs-sha256-128s-simple_clean': 4928,
+    'sphincs-sha256-128f-simple_clean': 4864,
+    'rainbowI-classic_m3': 214*32,
+    'gemss-128_m3': 228*20,
     'falcon-512_opt-ct': 897,
-    'dilithium2_m3': 2420
+    'dilithium2_m3': 40
 }
 
 DISPLAY_NAMES = {
@@ -187,7 +187,11 @@ def benchmarks_to_table(benchmark_names, results, category):
     for scheme in SCHEMES_SORTED:
         row = [scheme]
         total = 0
+        if scheme not in results:
+            continue
+        
         result = results[scheme]
+
         for name in bn_sorted:
             row.append(result[name])
             total += int(result[name])
@@ -219,6 +223,8 @@ def benchmarks_to_table_speed(benchmarks):
 
     rowsHashing = []
     for scheme in SCHEMES_SORTED:
+        if scheme not in benchmarks:
+            continue 
         row = [DISPLAY_NAMES[scheme]]
         rowHashing = [DISPLAY_NAMES[scheme]]
         cry_open = benchmarks[scheme]['crypto_sign_open_init_stream_cycles']
@@ -262,8 +268,8 @@ def benchmarks_to_table_speed(benchmarks):
         sha2_pk_verify = benchmarks[scheme]['crypto_sign_open_hash_pk_chunk_sha2cycles']
         sha3_pk_verify = benchmarks[scheme]['crypto_sign_open_hash_pk_chunk_sha3cycles']
 
-        #pk_verify = sha2_pk_verify + sha3_pk_verify
-        pk_verify = benchmarks[scheme]['crypto_sign_open_hash_pk_chunk']
+        pk_verify = sha2_pk_verify + sha3_pk_verify
+        # pk_verify = benchmarks[scheme]['crypto_sign_open_hash_pk_chunk']
         pk_verify_fmt = formatCell(pk_verify, True)
         if sha3_pk_verify > 0:
             pk_verify_fmt += "\\tnote{c}"
@@ -275,12 +281,12 @@ def benchmarks_to_table_speed(benchmarks):
         row.append(formatCell(pk_verify_total, True))
 
         # time in milliseconds
-        pk_verify_total_time = round(1000*pk_verify_total/(100*1000*1000))
+        pk_verify_total_time = round(1000*pk_verify_total/(100*1000*1000),1)
         row.append(formatCell(pk_verify_total_time, False)+" ms")
 
 
         time_including_streaming = STREAMING_TIME_MS[scheme] + pk_verify_total_time
-        row.append(formatCell(round(time_including_streaming), False)+" ms")
+        row.append(formatCell(round(time_including_streaming,1), False)+" ms")
 
         rows.append(row)
         rowsHashing.append(rowHashing)
@@ -294,6 +300,8 @@ def benchmarks_to_table_hash_pk_speed(benchmarks):
     rows = []
 
     for scheme in SCHEMES_SORTED:
+        if scheme not in benchmarks:
+            continue
         row = [
             DISPLAY_NAMES[scheme],
             formatCell(benchmarks[scheme]['crypto_sign_open_hash_pk_chunk_sha2cycles'], True),
@@ -310,6 +318,8 @@ def benchmarks_to_table_memory(benchmarks):
     rows = []
 
     for scheme in SCHEMES_SORTED:
+        if scheme not in benchmarks:
+            continue 
         bss = benchmarks[scheme]['binary_size_.bss']
         text = benchmarks[scheme]['binary_size_.text']
         stack = max(
@@ -320,6 +330,7 @@ def benchmarks_to_table_memory(benchmarks):
         )
         buffer = FIXED_BUFFER_SIZES[scheme]
         bss -= buffer
+        bss += 8
 
         textHash =  benchmarks[scheme]['binary_size_hashing_total']
         text -= textHash
@@ -361,7 +372,6 @@ def main():
 
 
     benchmarks = collect_average(collect_benchmarks(schemes))
-    print(benchmarks)
 
     benchmark_tables = {}
 

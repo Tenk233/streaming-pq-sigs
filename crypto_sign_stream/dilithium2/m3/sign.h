@@ -17,4 +17,15 @@ int crypto_sign_open(uint8_t *m, size_t *mlen,
                      const uint8_t *sm, size_t smlen,
                      const uint8_t *pk);
 
+#define crypto_sign_compute_w1 DILITHIUM_NAMESPACE(_crypto_sign_compute_w1)
+int crypto_sign_compute_w1(shake256incctx *w1_state,
+                            size_t k_idx,
+                            poly *t1,
+                            uint8_t *sig,
+                            uint8_t *rho);
+
+
+#define crypto_sign_verify_w1 DILITHIUM_NAMESPACE(_crypto_sign_verify_w1)
+int crypto_sign_verify_w1(shake256incctx *w1_state, uint8_t *sig);
+
 #endif

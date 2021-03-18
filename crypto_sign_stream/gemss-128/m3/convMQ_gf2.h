@@ -7,8 +7,6 @@
 
 
 UINT convMQ_uncompressL_gf2(uint64_t *pk2, const uint8_t *pk);
-UINT convMQ_last_uncompressL_gf2(uint64_t *pk2, const uint8_t *pk);
-
 
 
 

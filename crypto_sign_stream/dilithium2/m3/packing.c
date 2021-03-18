@@ -51,6 +51,12 @@ int unpack_sig_z(polyvecl *z, const unsigned char sig[CRYPTO_BYTES]) {
     return 0;
 }
 
+int unpack_sig_z_idx(poly *z_elem, const unsigned char sig[CRYPTO_BYTES], size_t idx) {
+    sig += SEEDBYTES;
+    polyz_unpack(z_elem, sig + idx * POLYZ_PACKEDBYTES);
+    return 0;
+}
+
 /*************************************************
 * Name:        unpack_sig_h
 *

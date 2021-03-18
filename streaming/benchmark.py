@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 import re
+import hashlib
 from collections import defaultdict
 from subprocess import check_output
 import subprocess
@@ -27,6 +28,15 @@ SHA3_SYMBOLS = ["shake128_absorb",  "shake128_squeezeblocks",  "cshake128_simple
 "shake256_inc_squeeze",  "shake128",  "shake256",  "sha3_256_inc_absorb",
 "sha3_256_inc_finalize",  "sha3_256",  "sha3_384_inc_absorb",  "sha3_384_inc_finalize",
 "sha3_384",  "sha3_512_inc_absorb",  "sha3_512_inc_finalize",  "sha3_512"]
+
+PK_HASH_FUNCTION = {
+    "crypto_sign_stream_gemss-128_m3" :                   lambda msg: hashlib.shake_128(msg).digest(32),
+    "crypto_sign_stream_dilithium2_m3" :                  lambda msg: hashlib.shake_256(msg).digest(32),
+    "crypto_sign_stream_falcon-512_opt-ct":               lambda msg: hashlib.shake_128(msg).digest(32),
+    "crypto_sign_stream_rainbowI-classic_m3":             lambda msg: hashlib.sha256(msg).digest(),
+    "crypto_sign_stream_sphincs-sha256-128f-simple_clean": lambda msg: msg,
+    "crypto_sign_stream_sphincs-sha256-128s-simple_clean": lambda msg: msg,
+}
 
 def _parse_args():
     parser = argparse.ArgumentParser("Program for benchmarking PQC implementations on the NUCLEO-F207ZG.")
@@ -74,7 +84,7 @@ def print_benchmarks_results(benchmarks):
         print(f"{b_name},{min_v},{max_v},{avg}")
 
 
-def run_benchmarks(cases, print_immediately):
+def run_benchmarks(cases, print_immediately, scheme_name):
     benchmark_results = defaultdict(list)
 
     def update_benchmark(result):
@@ -95,7 +105,7 @@ def run_benchmarks(cases, print_immediately):
             log.critical("Could not reset device. Halting.")
             sys.exit(3)
         log.info("Running test case %s.", test_case["name"])
-        s = stream.Stream(test_case["sm"], test_case["pk"])
+        s = stream.Stream(test_case["sm"], test_case["pk"], PK_HASH_FUNCTION[scheme_name])
         s.subscribe_message_type(stream.MessageType.BENCHMARK, update_benchmark)
         s.subscribe_message_type(stream.MessageType.RESULT, verify_result)
         s.stream()
@@ -176,7 +186,8 @@ def do_interactive_benchmarks(target_name, num_cases, print_immediately):
     if num_cases:
         cases = cases[:num_cases]
 
-    return run_benchmarks(cases, print_immediately)
+    scheme_name = "_".join(target_name.split("_")[:-1])
+    return run_benchmarks(cases, print_immediately, scheme_name)
 
 def main():
     args = _parse_args()

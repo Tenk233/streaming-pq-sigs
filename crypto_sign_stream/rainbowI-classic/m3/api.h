@@ -8,7 +8,7 @@
 
 #define CRYPTO_ALGNAME          "RAINBOW(16,36,32,32) - classic"
 
-#define COLUMNS_PER_CHUNK 512
+#define COLUMNS_PER_CHUNK 214
 #define CRYPTO_STREAM_MAX_CHUNK_SIZE (32*COLUMNS_PER_CHUNK)
 #define CRYPTO_STREAM_MAX_MSG_LEN 33
 #define CRYPTO_STREAM_ORDER_SM_PK
@@ -21,7 +21,7 @@
 /* Initialize stream with given length of sm.
  * This function has to initialize the context ctx with chunk size etc.
  */
-int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen);
+int crypto_sign_open_init_stream(crypto_stream_ctx *ctx, u32 smlen, u8 *pk_hash_init);
 /* Consume chunk of public key. id is the number of the chunk. */
 int crypto_sign_open_consume_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);
 int crypto_sign_open_hash_pk_chunk(crypto_stream_ctx *ctx, u8 *chunk, size_t pk_pos);

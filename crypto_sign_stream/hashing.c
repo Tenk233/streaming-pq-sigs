@@ -15,7 +15,6 @@
 
 /* sm + pk */
 u8 m[MLEN];
-u8 m_out[MLEN + CRYPTO_BYTES];
 u8 chunk[CRYPTO_STREAM_MAX_CHUNK_SIZE];
 
 
@@ -161,10 +160,17 @@ int main(void) {
 
   smlen = stream_recv_sm_length();
   stream_send_str("[DEVICE]Received length");
+
+  // Warning: In the real world the pk_hash would be embedded into the firmware.
+  // As we don't want to do that in our experiments, we just copy it here
+  u8 pk_hash[32];
+  stream_recv_pk_hash(pk_hash);
+  stream_send_str("[DEVICE]Received pk hash");
+
   
   aescycles = sha2cycles = sha3cycles = 0;
   t0 = hal_get_time();
-  tmp_res = crypto_sign_open_init_stream(&ctx, smlen);
+  tmp_res = crypto_sign_open_init_stream(&ctx, smlen, pk_hash);
   t1 = hal_get_time() - t0;
   stream_send_benchmark("crypto_sign_open_init_stream_cycles", t1);
   stream_send_benchmark("crypto_sign_open_init_stream_aescycles", aescycles);

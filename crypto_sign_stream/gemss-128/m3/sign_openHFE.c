@@ -114,36 +114,35 @@ void uncompress_signHFE(UINT *sm, const unsigned char *sm8) {
     }
 }
 
-
+/*
 static void uncompress_last_equations(uint64_t *dest, const uint8_t *src){
     uint64_t cst = 0;
     size_t i;
 
-    for (i = 0; i < (HFEmr8 - 1); i++) {
+    for (i = 0; i < HFEmr8; i++) {
         cst ^= convMQ_uncompressL_gf2(dest + 1 + i * NB_WORD_UNCOMP_EQ,
                 src + i * NB_BYTES_EQUATION) << i;
     }
-
-    /* The last equation in input is smaller because compressed */
-    cst ^= convMQ_last_uncompressL_gf2(dest + 1 + i * NB_WORD_UNCOMP_EQ,
-            src + i * NB_BYTES_EQUATION) << i;
-
     cst <<= HFEmr - HFEmr8;
     *dest = cst;
-}
+}*/
 
 
 
 void sign_openHFE_eval_last(uint64_t *acc, const uint64_t *vars,
                  const uint8_t *pk) {
     size_t i,j;
-    uint64_t pk_last[1 + NB_WORD_UNCOMP_EQ * HFEmr8];
-    uncompress_last_equations(pk_last, pk);
-    uint64_t cst = pk_last[0];
+    // this buffer could be eliminated
+    uint64_t pk_last[NB_WORD_UNCOMP_EQ];
+    uint64_t cst = 0;
 
     for (i = HFEmr - HFEmr8, j=0; i < HFEmr; ++i, ++j) {
-        acc[HFEmq] ^= evalMQnocst_gf2(vars, pk_last + 1 + j*NB_WORD_UNCOMP_EQ) << i;
+        cst ^= convMQ_uncompressL_gf2(pk_last,
+                pk + j * NB_BYTES_EQUATION) << j;
+
+        acc[HFEmq] ^= evalMQnocst_gf2(vars, pk_last) << i;
     }
+    cst <<= HFEmr - HFEmr8;
     acc[HFEmq] ^= cst;
 }
 

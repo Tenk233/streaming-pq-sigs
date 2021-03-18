@@ -2,6 +2,7 @@
 #define POLY_H
 
 #include <stdint.h>
+#include "fips202.h"
 #include "params.h"
 
 typedef struct {
@@ -25,18 +26,12 @@ void poly_invntt_tomont_leaktime(poly *a);
 
 #define poly_pointwise_montgomery_leaktime DILITHIUM_NAMESPACE(_poly_pointwise_montgomery_leaktime)
 void poly_pointwise_montgomery_leaktime(poly *c, const poly *a, const poly *b);
-#define poly_pointwise_acc_montgomery_leaktime DILITHIUM_NAMESPACE(_poly_pointwise_acc_montgomery_leaktime)
-void poly_pointwise_acc_montgomery_leaktime(poly *c, const poly *a, const poly *b);
 
 #define poly_use_hint DILITHIUM_NAMESPACE(_poly_use_hint)
 void poly_use_hint(poly *b, const poly *a, const poly *h);
 
 #define poly_chknorm DILITHIUM_NAMESPACE(_poly_chknorm)
 int poly_chknorm(const poly *a, int32_t B);
-#define poly_uniform DILITHIUM_NAMESPACE(_poly_uniform)
-void poly_uniform(poly *a,
-                  const uint8_t seed[SEEDBYTES],
-                  uint16_t nonce);
 
 #define poly_challenge DILITHIUM_NAMESPACE(_poly_challenge)
 void poly_challenge(poly *c, const uint8_t seed[SEEDBYTES]);
@@ -47,7 +42,6 @@ void polyt1_unpack(poly *r, const uint8_t *a);
 #define polyz_unpack DILITHIUM_NAMESPACE(_polyz_unpack)
 void polyz_unpack(poly *r, const uint8_t *a);
 
-#define polyw1_pack DILITHIUM_NAMESPACE(_polyw1_pack)
-void polyw1_pack(uint8_t *r, const poly *a);
-
+#define polyw1_pack_absorb DILITHIUM_NAMESPACE(_polyw1_pack_absorb)
+void polyw1_pack_absorb(shake256incctx *state, const poly *a);
 #endif

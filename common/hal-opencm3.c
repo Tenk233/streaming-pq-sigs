@@ -410,6 +410,9 @@ unsigned int stream_recv_sm_length(){
   hal_recv_bytes_poll((u8 *)&sm_len, 4);
   return sm_len;
 }
+void stream_recv_pk_hash(u8 *pk_hash){
+  hal_recv_bytes_poll(pk_hash, 32);
+}
 
 unsigned int strlen(const char *str){
   const char *tmp = str;
