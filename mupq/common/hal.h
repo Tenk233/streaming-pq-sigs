@@ -37,6 +37,7 @@ typedef enum {
 void stream_send_request(u32 offset, u32 size, stream_chunk_type type);
 void stream_init();
 unsigned int stream_recv_sm_length();
+void stream_recv_pk_hash(u8 *pk_hash);
 void stream_send_str(const char *pkg);
 void stream_send_benchmark(const char *name, u64 result);
 void stream_send_result(u32 result);
