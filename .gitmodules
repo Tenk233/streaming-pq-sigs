@@ -1,6 +1,6 @@
 [submodule "PQClean"]
 	path = pqclean
-	url = https://github.com/PQClean/PQClean.git
+	url = https://github.com/mkannwischer/PQClean
 [submodule "libopencm3"]
 	path = libopencm3
 	url = https://github.com/libopencm3/libopencm3.git
