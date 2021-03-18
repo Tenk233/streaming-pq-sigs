@@ -1,6 +1,6 @@
 [![forthebadge](https://forthebadge.com/images/badges/uses-badges.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/powered-by-electricity.svg)](https://forthebadge.com)
 # Streaming Post-Quantum Public Keys and Signatures
-This repository contains the code accompanying the paper "Verifying Post-Quantum Signatures in 18 kB of RAM".
+This repository contains the code accompanying the paper "Verifying Post-Quantum Signatures in 8 kB of RAM".
 
 All benchmarking results claimed in the paper can be reproduced with this code.
 It builds on top of [PQM3](https://github.com/mupq/pqm3) and [PQClean](https://github.com/pqclean/pqclean) libraries.
