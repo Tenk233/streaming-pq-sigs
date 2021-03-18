@@ -199,6 +199,7 @@ To print tables with benchmark results, call the [print_benchmarks.py](streaming
 ./streaming/print_benchmarks.py
 ```
 
+This requires the benchmarks to be located in the `benchmarks` folder.
 Calling the script with `-h` prints out all supported parameters.
 
 Important parameters:
@@ -206,6 +207,7 @@ Important parameters:
 * `-s` for selecting a specific scheme or multiple schemes
 * `-f` specifying the output format (plain, html or latex)
 * `-p` to output the final tables used in the paper
+* `-l` supplies a different path (location) to look for benchmarks
 
 Example calls:
 
